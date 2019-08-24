@@ -1,37 +1,40 @@
-function barFancy(data, opts)
+function barFancy(data, varargin)
 
-% TO DO: should allow user to define whether each var is between or within, and also to define arbitrary stat comparisons //deal with legend...
-% document // replace my hacky code with combvec! //
+% todo: replace my hacky code with combve
 
+% SETTINGS
 
-% settings
-s.showScatter = true;
+% bar settings
+s.showBars = false;  % add vertical bars instead of just horizontal line at mean
+s.barAlpha = .2;
 s.showErrorBars = true;
+s.colors = [.2 .2 .2]; % !!!
 s.showViolins = false;
-s.showStats = true;
-s.compareToFirstOnly = true; % only run stats between first and all other conditions
-s.conditionNames = {}; % nested cell array, where each cell array contains names of the levels of each variable
-s.isWithinSubs = true; % are the conditions within subjects
-s.smpNames = {};
-s.ylabel = [];
-s.conditionColors = [.2 .2 .2];
 s.violinAlpha = .2; % alpha for violin plot fill
-s.scatColors = 'hsv'; % can be a single rgb value, a name of a color space, or a matrix of colors
-s.ylim = [];
-s.ytick = [];
-s.addBars = false; % if true, add real bars, instead of just horizontal line at mean
-s.barAlpha = .2; % transparency of bars
-s.summaryFunction = @nanmean; % user can change this to nanmedian, for example
+s.barSeparation = 1;
+s.barWidth = 1;
+s.lineThickness = 3;
 
-s.groupSeparation = 1;
+% scatter settings
+s.showScatter = true;
+s.scatColors = 'hsv'; % can be a single rgb value, a name of a color space, or a matrix of colors
 s.circSize = 40;
 s.scatAlpha = .6;
-s.lineWidth = 1;
-s.lineThickness = 3;
+
+% labels
+s.conditionNames = {}; % nested cell array, where each cell array contains names of the levels of each variable
+s.ylabel = [];
+
+% stats settings
+s.showStats = true;
+s.compareToFirstOnly = true; % only run stats between first and all other conditions
+s.isWithinSubs = true; % are the conditions within subjects
 s.pThresh = .05;
 
-% reassign settings contained in opts
-if exist('opts', 'var'); for i = 1:2:length(opts); s.(opts{i}) = opts{i+1}; end; end
+
+
+% reassign settings passed in varargin
+if exist('varargin', 'var'); for i = 1:2:length(varargin); s.(varargin{i}) = varargin{i+1}; end; end
 
 % initializations
 numVariables = length(size(data))-1;
@@ -39,10 +42,10 @@ varLevelNum = size(data); varLevelNum = varLevelNum(1:end-1); % number of levels
 totalConditions = prod(varLevelNum);
 dataDims = size(data);
 
-if ischar(s.conditionColors) % set bar colors if color is specified as a string
-    s.conditionColors = eval([s.conditionColors '(totalConditions)']);
-elseif isequal(size(s.conditionColors), [1 3]) % if specified as a single rbg value, replicate into a matrix
-    s.conditionColors = repmat(s.conditionColors,totalConditions,1);
+if ischar(s.colors) % set bar colors if color is specified as a string
+    s.colors = eval([s.colors '(totalConditions)']);
+elseif isequal(size(s.colors), [1 3]) % if specified as a single rbg value, replicate into a matrix
+    s.colors = repmat(s.colors,totalConditions,1);
 end
 
 if ischar(s.scatColors) % set bar colors if color is specified as a string
@@ -56,7 +59,7 @@ end
 conditionsMat = nan(numVariables, totalConditions);
 labelVertSize = .15*numVariables; % size of space below figure to give to to axis labels, expressed as fraction of y range
 statsVertSpacing = .02; % vertical spacing of stat comparison lines, expressed as fraction of y range
-xJitters = linspace(-.5*s.lineWidth, .5*s.lineWidth, dataDims(end));
+xJitters = linspace(-.5*s.barWidth, .5*s.barWidth, dataDims(end));
 xJitters = xJitters(randperm(length(xJitters)));
 hold on
 
@@ -67,7 +70,7 @@ for i = 1:numVariables
     repeats = prod(varLevelNum(i+1:end));
     copies = totalConditions / (repeats*varLevelNum(i));
     conditionsMat(i,:) = repmat(repelem(1:varLevelNum(i), repeats), 1, copies);
-    xPositions = xPositions + (repelem(1:copies*varLevelNum(i), repeats)-1) * s.groupSeparation;
+    xPositions = xPositions + (repelem(1:copies*varLevelNum(i), repeats)-1) * s.barSeparation;
 end
 
 % add lines connecting same sample across conditions
@@ -103,9 +106,9 @@ for i = 1:totalConditions
     % add probability density estimate
     if s.showViolins
         [p,y] = ksdensity(condData);
-        p = p / max(p) * s.lineWidth*.5; % normalize range
+        p = p / max(p) * s.barWidth*.5; % normalize range
         fill([p -fliplr(p)]+xPositions(i), [y fliplr(y)], [.8 .8 .8], ...
-            'FaceColor', s.conditionColors(i,:), 'FaceAlpha', s.violinAlpha, 'EdgeColor', s.conditionColors(i,:))
+            'FaceColor', s.colors(i,:), 'FaceAlpha', s.violinAlpha, 'EdgeColor', s.colors(i,:))
     end
     
     % scatter raw data
@@ -116,34 +119,20 @@ for i = 1:totalConditions
     
     if s.showErrorBars
         err = nanstd(condData);
-        line([xPositions(i) xPositions(i)], [err -err] + s.summaryFunction(condData), ...
-            'color', s.conditionColors(i,:), 'linewidth', s.lineThickness*.5)
+        line([xPositions(i) xPositions(i)], [err -err] + nanmean(condData), ...
+            'color', s.colors(i,:), 'linewidth', s.lineThickness*.5)
     end
     
     % add mean
-    if ~s.addBars
-        line([-.5 .5]*s.lineWidth + xPositions(i), repmat(s.summaryFunction(condData),1,2), ...
-            'color', s.conditionColors(i,:), 'linewidth', s.lineThickness)
+    if ~s.showBars
+        line([-.5 .5]*s.barWidth + xPositions(i), repmat(nanmean(condData),1,2), ...
+            'color', s.colors(i,:), 'linewidth', s.lineThickness)
     end
 end
 
 
-% get or set y limit information
-if ~isempty(s.ylim)
-    set(gca, 'YLim', s.ylim);
-    yLims = s.ylim;
-else
-    yLims = get(gca, 'ylim');
-end
-
-if ~isempty(s.ytick)
-    set(gca, 'YTick', s.ytick);
-    yTicks = s.ytick;
-else
-    yTicks = get(gca, 'ytick');
-end
-
-
+% get y limit information
+yLims = get(gca, 'ylim');
 
 % add pairwise stats
 if s.showStats
@@ -188,17 +177,17 @@ end
 
 
 % add bars
-if s.addBars
+if s.showBars
     for i = 1:totalConditions
-        x = [-.5 .5]*s.lineWidth + xPositions(i);
-        y = [yLims(1), s.summaryFunction(allData{i})];
+        x = [-.5 .5]*s.barWidth + xPositions(i);
+        y = [yLims(1), nanmean(allData{i})];
         plot([x(1) x(1) x(2) x(2)], [y(1) y(2) y(2) y(1)], ...
-            'LineWidth', s.lineThickness, 'Color', s.conditionColors(i,:));
+            'LineWidth', s.lineThickness, 'Color', s.colors(i,:));
         
         if s.barAlpha>0
-            if ~isnan(s.summaryFunction(allData{i}))
-                rectangle('Position', [xPositions(i)-.5*s.lineWidth, yLims(1), s.lineWidth, s.summaryFunction(allData{i})-yLims(1)], ...
-                    'LineWidth', s.lineThickness, 'EdgeColor', 'none', 'FaceColor', [s.conditionColors(i,:) s.barAlpha]);
+            if ~isnan(nanmean(allData{i}))
+                rectangle('Position', [xPositions(i)-.5*s.barWidth, yLims(1), s.barWidth, nanmean(allData{i})-yLims(1)], ...
+                    'LineWidth', s.lineThickness, 'EdgeColor', 'none', 'FaceColor', [s.colors(i,:) s.barAlpha]);
             end
         end
     end
@@ -255,17 +244,8 @@ if ~isempty(s.conditionNames)
     yLims = [yMin, yLims(2)];
 end
 
-set(gca, 'YLim', yLims, 'YTick', yTicks, ...
-    'XLim', [0 xPositions(end)+1], 'XColor', 'none', ...
-    'Color', figColor)
-
-
-% add legend
-if ~isempty(s.smpNames)
-    for i = 1:length(s.smpNames); scatters(i) = scatter(nan,nan,50,scatColors(i,:),'o','filled'); end % create dummy scatters
-    legend(scatters, s.smpNames, 'Location', 'northeastoutside', 'box', 'off')
-end
-
+set(gca, 'YLim', yLims, 'XLim', [0 xPositions(end)+1], ...
+    'XColor', 'none', 'Color', figColor)
 
 % add y axis label
 if ~isempty(s.ylabel)
