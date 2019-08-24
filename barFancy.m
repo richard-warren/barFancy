@@ -5,12 +5,12 @@ function barFancy(data, varargin)
 % documentation at https://github.com/rwarren2163/fancyPlots
 %
 % Generates bat plots for data with >=1 FACTORS (gender, hair color),
-% each with >=2 LEVELS (e.g. {male, female}, {black, brown, 
-% blonde}. Each bar is a CONDITION (male, black hair), and the hierarchical
+% each with >=2 LEVELS (e.g. {male, female}, {red, blone, 
+% brown}. Each bar is a CONDITION (male, black hair), and the hierarchical
 % relationship between condition iis automatically preserved.
 %
 % EXAMPLES:
-% barFancy(data, 'showViolins', true, 'levelNames', {{'male', 'female'}, {'black', 'brown', 'blonde'}})
+% barFancy(data, 'showViolins', true, 'levelNames', {{'male', 'female'}, {'red', 'blonde', 'brown'}})
 % Run barFancy_demo to see examples of usage
 %
 % INPUTS:
@@ -24,7 +24,7 @@ function barFancy(data, varargin)
 % values in the structure 's'. See the comments in 'settings' below for a
 % full list of the many options available.
 
-% todo: output graph handle?
+% todo: return manipulable object so things can be adjusted posthoc
 
 
 % SETTINGS
@@ -33,20 +33,21 @@ function barFancy(data, varargin)
 s.showBars = true;            % add vertical bars instead of just horizontal line at mean for each condition
 s.barAlpha = .2;
 s.showErrorBars = true;
-s.errorFunction = @std;       % can change to custom error function, e.g. standard error instead of standard deviation
+s.summaryFunction = @nanmean; % statistic to use for bar height (can use median instead of mean, for example)
+s.errorFunction = @nanstd;    % can change to custom error function, e.g. standard error instead of standard deviation
 s.colors = [.2 .2 .2];        % bar colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a specific condition
 s.showViolins = false;        % add vertical probability density estimates, creating a 'violin plot'
 s.violinAlpha = .2;
-s.barSeparation = 1;
+s.barSeparation = 1;          % how far apart to separate bars // expressed as fraction of width of single bar
 s.barWidth = 1;
-s.lineThickness = 3;
+s.lineThickness = 3;          % thickness of bar border
 
 % scatter settings
-s.isRepeatedMeasures = true;  % whether same samples are represted across conditions (i.e. the design is 'within subjects')
+s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
 s.showScatter = true;         % scatter the values of individual samples
-s.scatterColors = 'hsv';      % scatter colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a particular sample
+s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (apopropriate for repeated measure designs)
 s.scatterSize = 40;
-s.scatterAlpha = .6;
+s.scatterAlpha = .2;
 
 % labels
 s.levelNames = {};            % names of levels for each factor // cell array of cell arrays where each nested array contains names of the levels for a particular factor, e.g. {{'male', 'female'}, {'tall', 'short'}}
@@ -74,17 +75,11 @@ elseif isequal(size(s.colors), [1 3]) % if specified as a single rbg value, repl
 end
 
 % set scatter colors if color is specified as a string
-if ischar(s.scatterColors)
-    if s.isRepeatedMeasures
-        s.scatterColors = eval([s.scatterColors '(dataDims(end))']);
-    else
-        s.scatterColors = [.5 .5 .5];
-    end
-end
+if ischar(s.scatterColors); s.scatterColors = eval([s.scatterColors '(dataDims(end))']); end
 
 % determine various spatial parameters
 labelVertSize = .15*numFactors;  % size of space below figure to give to to axis labels, expressed as fraction of y range
-xJitters = linspace(-.5*s.barWidth, .5*s.barWidth, dataDims(end));  % jitters for scatter points
+xJitters = linspace(-.25*s.barWidth, .25*s.barWidth, dataDims(end));  % jitters for scatter points
 xJitters = xJitters(randperm(length(xJitters)));
 
 % create matrix where each row is a factor, each entry is a level for a
@@ -98,6 +93,8 @@ for i = 1:numFactors
     conditionsMat(i,:) = repmat(repelem(1:numLevels(i), repeats), 1, copies);
     xPositions = xPositions + (repelem(1:copies*numLevels(i), repeats)-1) * s.barSeparation;
 end
+line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % add line at y=0 zero
+
 
 
 
@@ -106,7 +103,7 @@ end
 hold on
 
 % add lines connecting same sample across conditions
-if s.isRepeatedMeasures && dataDims(end)<100  % latter term prevents drawing lines with there are a large number of samples
+if s.connectDots && dataDims(end)<100  % latter term prevents drawing lines with there are a large number of samples
     for i = 1:dataDims(end)  % loop across samples
         
         % get data for sample in all conditions
@@ -145,31 +142,35 @@ for i = 1:numConditions
     % add error bars
     if s.showErrorBars
         err = s.errorFunction(condData);
-        line([xPositions(i) xPositions(i)], [err -err] + nanmean(condData), ...
+        line([xPositions(i) xPositions(i)], [err -err] + s.summaryFunction(condData), ...
             'color', s.colors(i,:), 'linewidth', s.lineThickness*.5)
     end
     
     % add mean
     if ~s.showBars
-        line([-.5 .5]*s.barWidth + xPositions(i), repmat(nanmean(condData),1,2), ...
+        line([-.5 .5]*s.barWidth + xPositions(i), repmat(s.summaryFunction(condData),1,2), ...
             'color', s.colors(i,:), 'linewidth', s.lineThickness)
     end
 end
 
-yLims = get(gca, 'ylim');  % get initial y limits (which will be subsequently adjusted)
-
 % add bars
 if s.showBars
     for i = 1:numConditions
+        
+        % add bar outline
         x = [-.5 .5]*s.barWidth + xPositions(i);
-        y = [yLims(1), nanmean(allData{i})];
+        y = [0, s.summaryFunction(allData{i})];
         plot([x(1) x(1) x(2) x(2)], [y(1) y(2) y(2) y(1)], ...
             'LineWidth', s.lineThickness, 'Color', s.colors(i,:));
         
+        % fill in bar
         if s.barAlpha>0
-            if ~isnan(nanmean(allData{i}))
-                rectangle('Position', [xPositions(i)-.5*s.barWidth, yLims(1), s.barWidth, nanmean(allData{i})-yLims(1)], ...
-                    'LineWidth', s.lineThickness, 'EdgeColor', 'none', 'FaceColor', [s.colors(i,:) s.barAlpha]);
+            if ~isnan(s.summaryFunction(allData{i}))
+                height = s.summaryFunction(allData{i});
+                x = xPositions(i)-.5*s.barWidth;  % bottom left corner of bar
+                y = min(height, 0);               % bottom left corner of bar
+                rectangle('Position', [x, y, s.barWidth, abs(height)], 'LineWidth', s.lineThickness, ...
+                    'EdgeColor', 'none', 'FaceColor', [s.colors(i,:) s.barAlpha]);
             end
         end
     end
@@ -180,13 +181,10 @@ end
 
 % ADD X AXIS LABELS
 
-% add room below figure for labels
-figColor = get(gcf, 'color');
-if ~isempty(s.levelNames)
-    yMin = yLims(1)-labelVertSize*range(yLims);
-    line([0 0], [yMin, yLims(1)], 'color', figColor, 'linewidth', 3) % cover bottom of y axis with white line
-    yLims = [yMin, yLims(2)];
-end
+% get initial y ticks and y limitis (will be subsequently adjusted)
+yLims = get(gca, 'ylim');
+yTicks = get(gca, 'ytick');
+
 
 % add labels
 for i = 1:length(s.levelNames)
@@ -221,9 +219,6 @@ for i = 1:length(s.levelNames)
     end
 end
 
-set(gca, 'YLim', yLims, 'XLim', [0 xPositions(end)+1], ...
-    'XColor', 'none', 'Color', figColor)
-
 % add y axis label
 if ~isempty(s.ylabel)
     lab = ylabel(s.ylabel);
@@ -232,7 +227,17 @@ if ~isempty(s.ylabel)
     set(lab, 'position', labPos);
 end
 
-pause(.001)
+% add room below figure for labels
+figColor = get(gcf, 'color');
+if ~isempty(s.levelNames)
+    yMin = yLims(1)-labelVertSize*range(yLims);
+    lineObj = line([0 0], [yMin, yLims(1)], 'color', figColor, 'linewidth', 3); % cover bottom of y axis with white line
+    uistack(lineObj, 'bottom')
+    yLims = [yMin, yLims(2)];
+end
 
+% reset axis ticks and limits
+set(gca, 'YLim', yLims, 'yTick', yTicks, 'XLim', [0 xPositions(end)+1], ...
+    'XColor', 'none', 'Color', figColor)
 
 
