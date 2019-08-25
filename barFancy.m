@@ -38,7 +38,7 @@ s.errorFunction = @nanstd;    % can change to custom error function, e.g. standa
 s.colors = [.2 .2 .2];        % bar colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a specific condition
 s.showViolins = false;        % add vertical probability density estimates, creating a 'violin plot'
 s.violinAlpha = .2;
-s.barSeparation = 1;          % how far apart to separate bars // expressed as fraction of width of single bar
+s.barSeparation = .5;          % how far apart to separate bars // expressed as fraction of width of single bar
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
 
@@ -158,10 +158,12 @@ if s.showBars
     for i = 1:numConditions
         
         % add bar outline
-        x = [-.5 .5]*s.barWidth + xPositions(i);
-        y = [0, s.summaryFunction(allData{i})];
-        plot([x(1) x(1) x(2) x(2)], [y(1) y(2) y(2) y(1)], ...
-            'LineWidth', s.lineThickness, 'Color', s.colors(i,:));
+        if s.barAlpha<1
+            x = [-.5 .5]*s.barWidth + xPositions(i);
+            y = [0, s.summaryFunction(allData{i})];
+            plot([x(1) x(1) x(2) x(2)], [y(1) y(2) y(2) y(1)], ...
+                'LineWidth', s.lineThickness, 'Color', s.colors(i,:));
+        end
         
         % fill in bar
         if s.barAlpha>0

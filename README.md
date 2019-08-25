@@ -48,9 +48,9 @@ barFancy(moodShuffled, 'levelNames', levelsShuffled, 'ylabel', 'grumpiness', 'co
 
 There are tons of visualization options. Here are some examples of what you can play around with:
 ```
-% violin plot
+% violin plot with no error bars
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, ...
-    'showBars', false', 'showViolins', true)
+    'showBars', false', 'showViolins', true, 'showErrorBars', false)
 ```
 ![](exampleImages/bar2.png)
 
@@ -62,9 +62,9 @@ barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, .
 ![](exampleImages/bar3.png)
 
 ```
-% bar plot with solid bars, no scatter points, and no error bars
+% % bar plot with solid bars, no scatter points, and no spacing between bars
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, ...
-    'barAlpha', 1, 'showScatter', false)
+    'barAlpha', 1, 'showScatter', false, 'barSeparation', 0)
 ```
 ![](exampleImages/bar4.png)
 
@@ -80,7 +80,7 @@ s.errorFunction = @nanstd;    % can change to custom error function, e.g. standa
 s.colors = [.2 .2 .2];        % bar colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a specific condition
 s.showViolins = false;        % add vertical probability density estimates, creating a 'violin plot'
 s.violinAlpha = .2;
-s.barSeparation = 1;          % how far apart to separate bars // expressed as fraction of width of single bar
+s.barSeparation = .5;          % how far apart to separate bars // expressed as fraction of width of single bar
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
 
