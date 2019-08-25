@@ -38,7 +38,7 @@ s.errorFunction = @nanstd;    % can change to custom error function, e.g. standa
 s.colors = [.2 .2 .2];        % bar colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a specific condition
 s.showViolins = false;        % add vertical probability density estimates, creating a 'violin plot'
 s.violinAlpha = .2;
-s.barSeparation = .5;          % how far apart to separate bars // expressed as fraction of width of single bar
+s.barSeparation = .5;         % how far apart to separate bars // expressed as fraction of width of single bar
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
 
@@ -52,6 +52,9 @@ s.scatterAlpha = .2;
 % labels
 s.levelNames = {};            % names of levels for each factor // cell array of cell arrays where each nested array contains names of the levels for a particular factor, e.g. {{'male', 'female'}, {'tall', 'short'}}
 s.ylabel = [];
+
+% other
+s.labelSizePerFactor = .15;    % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
 
 
 
@@ -78,7 +81,7 @@ end
 if ischar(s.scatterColors); s.scatterColors = eval([s.scatterColors '(dataDims(end))']); end
 
 % determine various spatial parameters
-labelVertSize = .15*numFactors;  % size of space below figure to give to to axis labels, expressed as fraction of y range
+labelVertSize = s.labelSizePerFactor*numFactors;  % size of space below figure to give to to axis labels, expressed as fraction of y range
 xJitters = linspace(-.25*s.barWidth, .25*s.barWidth, dataDims(end));  % jitters for scatter points
 xJitters = xJitters(randperm(length(xJitters)));
 

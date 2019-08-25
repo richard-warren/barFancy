@@ -11,7 +11,7 @@ Imagine you are trying to figure out when people are most grumpy. You guess that
 ## example
 Let's start by generating some fake grumpiness data:
 ```Matlab
-% model how gumpy people are in different seasons, days, and times
+% model how grumpy people are in different seasons, days, and times
 levels = {{'summer', 'winter'}, ...
            {'weekday', 'weedend'}, ...
            {'morning', 'noon', 'night'}};  % 3 factors with 2, 2, and 3 levels
@@ -80,7 +80,7 @@ s.errorFunction = @nanstd;    % can change to custom error function, e.g. standa
 s.colors = [.2 .2 .2];        % bar colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a specific condition
 s.showViolins = false;        % add vertical probability density estimates, creating a 'violin plot'
 s.violinAlpha = .2;
-s.barSeparation = .5;          % how far apart to separate bars // expressed as fraction of width of single bar
+s.barSeparation = .5;         % how far apart to separate bars // expressed as fraction of width of single bar
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
 
@@ -94,4 +94,7 @@ s.scatterAlpha = .2;
 % labels
 s.levelNames = {};            % names of levels for each factor // cell array of cell arrays where each nested array contains names of the levels for a particular factor, e.g. {{'male', 'female'}, {'tall', 'short'}}
 s.ylabel = [];
+
+% other
+s.labelSizePerFactor = .15;    % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
 ```
