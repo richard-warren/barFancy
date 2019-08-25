@@ -31,12 +31,12 @@ Let's check out the default plot:
 % default settings
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors)
 ```
-![](exampleImages/bar1.png)
+<img src="exampleImages/bar1.png" width="400">
 
 
 It's super trivial to reorder the factor hierarchy. Simply change the order of the dimensions in your matrix, and you're done!
 ```
-% reshuffled factor hierarchhy
+% reshuffled factor hierarchy
 moodShuffled = permute(mood, [3,1,2,4]);
 levelsShuffled = levels([3,1,2]);
 barFancy(moodShuffled, 'levelNames', levelsShuffled, 'ylabel', 'grumpiness', 'colors', 'jet')
@@ -66,3 +66,5 @@ barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, .
     'barAlpha', 1, 'showScatter', false)
 ```
 ![](exampleImages/bar4.png)
+
+## options
