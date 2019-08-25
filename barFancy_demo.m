@@ -38,7 +38,7 @@ barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, .
 %% bar plot with solid bars, no scatter points, and no error bars
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, ...
-    'barAlpha', 1, 'showScatter', false)
+    'barAlpha', 1, 'showScatter', false, 'showErrorBars', false)
 
 %% reshuffle factor hierarchy
 

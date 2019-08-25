@@ -45,7 +45,7 @@ s.lineThickness = 3;          % thickness of bar border
 % scatter settings
 s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
 s.showScatter = true;         % scatter the values of individual samples
-s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (apopropriate for repeated measure designs)
+s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (appropriate for repeated measure designs)
 s.scatterSize = 40;
 s.scatterAlpha = .2;
 

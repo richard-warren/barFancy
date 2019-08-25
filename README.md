@@ -1,12 +1,12 @@
-# fancy bar plots!
-I'm sick and tired of plots that aren't fancy! `barFancy` allows you to make beautiful bar plots for simple data, as well as datasets with arbitrarily complex factor hierarchies.
+# make your plots more fancy
+I'm sick and tired of plots that aren't fancy! `barFancy` allows you to make beautiful bar plots using simple data, as well as datasets with arbitrarily complex factor hierarchies.
 
 Imagine you are trying to figure out when people are most grumpy. You guess that grumpiness varies with certain **factors**, such as the season, the day of the week, and the time of day. Each of these factors has multiple **levels** (summer/winter, weekday/weekend, morning/noon/night). With `barFancy` you can quickly generate bar plots that show the hierarchical relationships between your factors:
 
 ![](exampleImages/bar2.png)
 
 
-`barFancy` takes as input a *number of factors + 1* dimensional data matrix, where each dimension is a factor, and the last dimension contains data from all of your samples. There are tons of visualization options that can be passed in as Name-Value pairs (see below).
+`barFancy` takes **requires only one input**: a *(number of factors) + 1* dimensional matrix, where each dimension is a factor, except the last dimension which contains data from all of your samples. There are tons of visualization options that can be passed as Name-Value pairs (see below).
 
 ## example
 Let's start by generating some fake grumpiness data:
@@ -69,7 +69,7 @@ barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, .
 ![](exampleImages/bar4.png)
 
 ## options
-Here are the default values for the options that can be passed in as Name-Value pairs:
+Here are the options that can be passed in as Name-Value pairs, along with their default values:
 ```
 % bar settings
 s.showBars = true;            % add vertical bars instead of just horizontal line at mean for each condition
@@ -87,7 +87,7 @@ s.lineThickness = 3;          % thickness of bar border
 % scatter settings
 s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
 s.showScatter = true;         % scatter the values of individual samples
-s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (apopropriate for repeated measure designs)
+s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (appropriate for repeated measure designs)
 s.scatterSize = 40;
 s.scatterAlpha = .2;
 
