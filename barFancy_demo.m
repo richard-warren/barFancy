@@ -21,30 +21,30 @@ mood(:,2,:,:) = mood(:,2,:,:)-2; % less grumpy on weekends    :)
 % make kick ass color scheme
 colors = [hot(3); hot(3); winter(3); winter(3)] * .75;
 
-savePlots = false;  % saving plots will only work if running script from it's root directory
+savePlots = true;  % saving plots will only work if running script from it's root directory
 
 %% bar plot
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors)
-if savePlots; saveas(gcf, 'exampleImages\bar1.jpg'); end
+if savePlots; saveas(gcf, 'exampleImages\bar1.png'); end
 
 %% violin plot with no error bars
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, ...
     'showBars', false', 'showViolins', true, 'showErrorBars', false)
-if savePlots; saveas(gcf, 'exampleImages\bar2.jpg'); end
+if savePlots; saveas(gcf, 'exampleImages\bar2.png'); end
 
 %% plot with no bars, median instead of mean, and connected scatter points
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, ...
     'showBars', false', 'summaryFunction', @median, 'connectDots', true, 'lineThickness', 5)
-if savePlots; saveas(gcf, 'exampleImages\bar3.jpg'); end
+if savePlots; saveas(gcf, 'exampleImages\bar3.png'); end
 
 %% bar plot with solid bars, no scatter points, and no spacing between bars
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, ...
     'barAlpha', 1, 'showScatter', false, 'barSeparation', 0)
-if savePlots; saveas(gcf, 'exampleImages\bar4.jpg'); end
+if savePlots; saveas(gcf, 'exampleImages\bar4.png'); end
 
 %% reshuffle factor hierarchy
 
@@ -53,7 +53,7 @@ levelsShuffled = levels([3,1,2]);
 
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(moodShuffled, 'levelNames', levelsShuffled, 'ylabel', 'grumpiness', 'colors', 'jet')
-if savePlots; saveas(gcf, 'exampleImages\bar5.jpg'); end
+if savePlots; saveas(gcf, 'exampleImages\bar5.png'); end
 
 %% collapse across factor
 
@@ -62,7 +62,7 @@ levelsCollapsed = levels(2:end);
 
 figure('Color', 'white', 'Position', [100 100, 400 400], 'MenuBar', 'none')
 barFancy(moodCollapsed, 'levelNames', levelsCollapsed, 'ylabel', 'grumpiness', 'colors', 'jet')
-if savePlots; saveas(gcf, 'exampleImages\bar6.jpg'); end
+if savePlots; saveas(gcf, 'exampleImages\bar6.png'); end
 
 
 
