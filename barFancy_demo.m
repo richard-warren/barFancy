@@ -12,16 +12,16 @@ levels = {{'summer', 'winter'}, ...
            {'morning', 'noon', 'night'}};  % 3 factors with 2, 2, and 3 levels
 samples = 10;  % number of samples in each condition
 
+% generate 2 (season) X 2 (day) X 3 (time) X samples matrix
 mood = normrnd(0, 1, [2,2,3,samples]);
 mood(2,:,:,:) = mood(2,:,:,:)+4; % grumpy in the winter       :(
 mood(:,1,1,:) = mood(:,1,1,:)+4; % grumpy weekday mornings    :(
 mood(:,2,:,:) = mood(:,2,:,:)-2; % less grumpy on weekends    :)
 
-% make sweet color scheme
+% make kick ass color scheme
 colors = [hot(3); hot(3); winter(3); winter(3)] * .75;
 
 %% bar plot
-close all
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
 barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors)
 
