@@ -21,7 +21,7 @@ mood(:,2,:,:) = mood(:,2,:,:)-2; % less grumpy on weekends    :)
 % make kick ass color scheme
 colors = [hot(3); hot(3); winter(3); winter(3)] * .75;
 
-savePlots = true;  % saving plots will only work if running script from it's root directory
+savePlots = false;  % saving plots will only work if running script from it's root directory
 
 %% bar plot
 figure('Color', 'white', 'Position', [100 100, 800 400], 'MenuBar', 'none')
