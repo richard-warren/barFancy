@@ -179,7 +179,7 @@ end
 
 
 
-% ADD X AXIS LABELS
+% ADD AXIS LABELS
 
 % get initial y ticks and y limitis (will be subsequently adjusted)
 yLims = get(gca, 'ylim');
