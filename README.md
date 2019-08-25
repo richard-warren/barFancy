@@ -69,3 +69,29 @@ barFancy(mood, 'levelNames', levels, 'ylabel', 'grumpiness', 'colors', colors, .
 ![](exampleImages/bar4.png)
 
 ## options
+Here are the default values for the options that can be passed in as Name-Value pairs:
+```
+% bar settings
+s.showBars = true;            % add vertical bars instead of just horizontal line at mean for each condition
+s.barAlpha = .2;
+s.showErrorBars = true;
+s.summaryFunction = @nanmean; % statistic to use for bar height (can use median instead of mean, for example)
+s.errorFunction = @nanstd;    % can change to custom error function, e.g. standard error instead of standard deviation
+s.colors = [.2 .2 .2];        % bar colors // can be name of matlab color space (e.g. 'hsv') OR nX3 matrix of colors where each row is the color of a specific condition
+s.showViolins = false;        % add vertical probability density estimates, creating a 'violin plot'
+s.violinAlpha = .2;
+s.barSeparation = 1;          % how far apart to separate bars // expressed as fraction of width of single bar
+s.barWidth = 1;
+s.lineThickness = 3;          % thickness of bar border
+
+% scatter settings
+s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
+s.showScatter = true;         % scatter the values of individual samples
+s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (apopropriate for repeated measure designs)
+s.scatterSize = 40;
+s.scatterAlpha = .2;
+
+% labels
+s.levelNames = {};            % names of levels for each factor // cell array of cell arrays where each nested array contains names of the levels for a particular factor, e.g. {{'male', 'female'}, {'tall', 'short'}}
+s.ylabel = [];
+```
