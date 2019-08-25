@@ -113,7 +113,7 @@ if s.connectDots && dataDims(end)<100  % latter term prevents drawing lines with
             smpData(j) = squeeze(data(inds{:}));
         end
 
-        line(xPositions+xJitters(i), smpData, 'linewidth', 1, 'color', [.8 .8 .8 s.scatterAlpha]);
+        line(xPositions+xJitters(i), smpData, 'linewidth', 1, 'color', 1-[1 1 1]*s.scatterAlpha);
     end
 end
 
