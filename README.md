@@ -1,9 +1,16 @@
+<style>
+p {
+  text-align:center
+}
+</style>
+
 # fancy bar plots!
 I'm sick and tired of plots that aren't fancy! `barFancy` allows you to make beautiful bar plots for simple data, as well as datasets with arbitrarily complex factor hierarchies.
 
 Imagine you are trying to figure out when people are most grumpy. You guess that grumpiness varies with certain **factors**, such as the season, the day of the week, and the time of day. Each of these factors has multiple **levels** (summer/winter, weekday/weekend, morning/noon/night). With `barFancy` you can quickly generate bar plots that show the hierarchical relationships between your factors:
 
-![](exampleImages/bar1.png)<!-- .element width="50%" -->
+<p style="text-align:center"><img src="exampleImages/bar1.png" width="70%"></p>
+
 
 `barFancy` takes as input a *number of factors + 1* dimensional data matrix, where each dimension is a factor, and the last dimension contains data from all of your samples. There are tons of visualization options that can be passed in as Name-Value pairs (see below).
 
