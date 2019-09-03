@@ -42,6 +42,9 @@ s.barSeparation = .5;         % how far apart to separate bars // expressed as f
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
 
+% axis settings
+s.YLim = [];
+
 % scatter settings
 s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
 s.showScatter = true;         % scatter the values of individual samples
@@ -102,7 +105,9 @@ line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % ad
 
 
 
+
 % GENERATE PLOT
+
 hold on
 
 % add lines connecting same sample across conditions
@@ -156,7 +161,6 @@ for i = 1:numConditions
     end
 end
 
-
 % add bars
 if s.showBars
     for i = 1:numConditions
@@ -183,20 +187,24 @@ end
 
 
 % SET Y LIMITS
-ys = cellfun(s.summaryFunction, allData);
-if s.showScatter; ys = [ys'; data(:)]; end
-buffer = range(ys)*.05;  % how much space to add beyond data extrema
-if min(ys)>0
-    ymin = 0;
-    ymax = max(ys) + buffer;
-elseif max(ys)<0
-    ymin = min(ys) - buffer;
-    ymax = 0;
+if isempty(s.YLim)
+    ys = cellfun(s.summaryFunction, allData);
+    if s.showScatter; ys = [ys'; data(:)]; end
+    buffer = range(ys)*.05;  % how much space to add beyond data extrema
+    if min(ys)>0
+        ymin = 0;
+        ymax = max(ys) + buffer;
+    elseif max(ys)<0
+        ymin = min(ys) - buffer;
+        ymax = 0;
+    else
+        ymin = min(ys) - buffer;
+        ymax = max(ys) + buffer;
+    end
+    s.YLim = [ymin ymax];
 else
-    ymin = min(ys) - buffer;
-    ymax = max(ys) + buffer;
+    s.YLim = get(gca, 'YLim');
 end
-yLims = [ymin ymax];
 yTicks = get(gca, 'ytick');
 
 
@@ -206,9 +214,8 @@ yTicks = get(gca, 'ytick');
 
 % cover area beneathe lower y limit with white box
 % this prevents bars from extending into the label area
-rectangle('Position', [0, yLims(1)-range(yLims), xPositions(end)+1, range(yLims)], ...
+rectangle('Position', [0, s.YLim(1)-range(s.YLim), xPositions(end)+1, range(s.YLim)], ...
     'FaceColor', figColor, 'EdgeColor', 'none')
-
 
 % add labels
 for i = 1:length(s.levelNames)
@@ -222,7 +229,7 @@ for i = 1:length(s.levelNames)
         for k = 1:numLevels(i)
             inds = find(conditionsMat(i,:)==k & bins');
             xPos = mean(xPositions(inds));
-            yPos = yLims(1)-labelVertSize*range(yLims) + ((labelVertSize*range(yLims))/length(dataDims)*i);
+            yPos = s.YLim(1)-labelVertSize*range(s.YLim) + ((labelVertSize*range(s.YLim))/length(dataDims)*i);
             if i==numFactors; rotation = 25; else; rotation = 0; end
             if ~isempty(s.levelNames)
                 condText = text(xPos, yPos, s.levelNames{i}(k), 'rotation', rotation, ...
@@ -247,20 +254,20 @@ end
 if ~isempty(s.ylabel)
     lab = ylabel(s.ylabel);
     labPos = get(lab, 'position');
-    labPos(2) = mean(yLims);
+    labPos(2) = mean(s.YLim);
     set(lab, 'position', labPos);
 end
 
 % add room below figure for labels
 if ~isempty(s.levelNames)
-    yMin = yLims(1)-labelVertSize*range(yLims);
-    lineObj = line([0 0], [yMin, yLims(1)], 'color', figColor, 'linewidth', 3); % cover bottom of y axis with white line
+    yMin = s.YLim(1)-labelVertSize*range(s.YLim);
+    lineObj = line([0 0], [yMin, s.YLim(1)], 'color', figColor, 'linewidth', 3); % cover bottom of y axis with white line
     uistack(lineObj, 'bottom')
-    yLims = [yMin, yLims(2)];
+    s.YLim = [yMin, s.YLim(2)];
 end
 
 % reset axis ticks and limits
-set(gca, 'YLim', yLims, 'yTick', yTicks, 'XLim', [0 xPositions(end)+1], ...
+set(gca, 'YLim', s.YLim, 'yTick', yTicks, 'XLim', [0 xPositions(end)+1], ...
     'XColor', 'none', 'Color', figColor)
 
 
