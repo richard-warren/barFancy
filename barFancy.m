@@ -101,7 +101,6 @@ for i = 1:numFactors
     conditionsMat(i,:) = repmat(repelem(1:numLevels(i), repeats), 1, copies);
     xPositions = xPositions + (repelem(1:copies*numLevels(i), repeats)-1) * s.barSeparation;
 end
-line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % add line at y=0 zero
 
 
 
@@ -185,28 +184,36 @@ end
 
 
 
-
 % SET Y LIMITS
 if isempty(s.YLim)
-    ys = cellfun(s.summaryFunction, allData);
-    if s.showScatter; ys = [ys'; data(:)]; end  % ys contains all data to be included in range, which is either the summary of each condition, or the summary plus scatters for each condition
-    buffer = range(ys)*.05;
-    if min(ys)>0  % if all data are positive, lower y limit is 0
-        ymin = 0;
-        ymax = max(ys) + buffer;
-    elseif max(ys)<0  % if all data are negative, upper y limit is zero
-        ymin = min(ys) - buffer;
-        ymax = 0;
+    if s.showBars  % bar plot will always start at zero // otherwise, use the automatically determined y limits
+        summaries = cellfun(s.summaryFunction, allData)';
+        errors = cellfun(s.errorFunction, allData)';
+        
+        ys = summaries;  % ys contains all data to be included in range, which depends on elements are to be included in plot
+        if s.showScatter; ys = [ys; data(:)]; end
+        if s.showErrorBars; ys = [ys; summaries+errors; summaries-errors]; end
+
+        buffer = range(ys)*.05;
+        if min(ys)>0  % if all data are positive, lower y limit is 0
+            ymin = 0;
+            ymax = max(ys) + buffer;
+        elseif max(ys)<0  % if all data are negative, upper y limit is zero
+            ymin = min(ys) - buffer;
+            ymax = 0;
+        else
+            ymin = min(ys) - buffer;
+            ymax = max(ys) + buffer;
+        end
+        s.YLim = [ymin ymax];
     else
-        ymin = min(ys) - buffer;
-        ymax = max(ys) + buffer;
+        s.YLim = get(gca, 'YLim');
     end
-    s.YLim = [ymin ymax];
-else
-    s.YLim = get(gca, 'YLim');
 end
+set(gca, 'YLim', s.YLim);
 yTicks = get(gca, 'ytick');
 
+line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % add line at y=0 zero
 
 
 
