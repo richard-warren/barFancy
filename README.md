@@ -84,6 +84,9 @@ s.barSeparation = .5;         % how far apart to separate bars // expressed as f
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
 
+% axis settings
+s.YLim = [];
+
 % scatter settings
 s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
 s.showScatter = true;         % scatter the values of individual samples
@@ -96,5 +99,5 @@ s.levelNames = {};            % names of levels for each factor // cell array of
 s.ylabel = [];
 
 % other
-s.labelSizePerFactor = .15;    % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
+s.labelSizePerFactor = .15;   % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
 ```
