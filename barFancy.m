@@ -189,12 +189,12 @@ end
 % SET Y LIMITS
 if isempty(s.YLim)
     ys = cellfun(s.summaryFunction, allData);
-    if s.showScatter; ys = [ys'; data(:)]; end
-    buffer = range(ys)*.05;  % how much space to add beyond data extrema
-    if min(ys)>0
+    if s.showScatter; ys = [ys'; data(:)]; end  % ys contains all data to be included in range, which is either the summary of each condition, or the summary plus scatters for each condition
+    buffer = range(ys)*.05;
+    if min(ys)>0  % if all data are positive, lower y limit is 0
         ymin = 0;
         ymax = max(ys) + buffer;
-    elseif max(ys)<0
+    elseif max(ys)<0  % if all data are negative, upper y limit is zero
         ymin = min(ys) - buffer;
         ymax = 0;
     else
