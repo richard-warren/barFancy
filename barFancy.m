@@ -61,6 +61,8 @@ s.labelSizePerFactor = .15;   % how much space to add to the bottom of the figur
 
 % INITIALIZATIONS
 
+figColor = get(gcf, 'color'); % get figure background color
+
 % reassign settings passed in varargin
 if exist('varargin', 'var'); for i = 1:2:length(varargin); s.(varargin{i}) = varargin{i+1}; end; end
 
@@ -97,8 +99,6 @@ for i = 1:numFactors
     xPositions = xPositions + (repelem(1:copies*numLevels(i), repeats)-1) * s.barSeparation;
 end
 line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % add line at y=0 zero
-
-
 
 
 
@@ -156,6 +156,7 @@ for i = 1:numConditions
     end
 end
 
+
 % add bars
 if s.showBars
     for i = 1:numConditions
@@ -181,11 +182,32 @@ end
 
 
 
+% SET Y LIMITS
+ys = cellfun(s.summaryFunction, allData);
+if s.showScatter; ys = [ys'; data(:)]; end
+buffer = range(ys)*.05;  % how much space to add beyond data extrema
+if min(ys)>0
+    ymin = 0;
+    ymax = max(ys) + buffer;
+elseif max(ys)<0
+    ymin = min(ys) - buffer;
+    ymax = 0;
+else
+    ymin = min(ys) - buffer;
+    ymax = max(ys) + buffer;
+end
+yLims = [ymin ymax];
+yTicks = get(gca, 'ytick');
+
+
+
+
 % ADD AXIS LABELS
 
-% get initial y ticks and y limitis (will be subsequently adjusted)
-yLims = get(gca, 'ylim');
-yTicks = get(gca, 'ytick');
+% cover area beneathe lower y limit with white box
+% this prevents bars from extending into the label area
+rectangle('Position', [0, yLims(1)-range(yLims), xPositions(end)+1, range(yLims)], ...
+    'FaceColor', figColor, 'EdgeColor', 'none')
 
 
 % add labels
@@ -230,7 +252,6 @@ if ~isempty(s.ylabel)
 end
 
 % add room below figure for labels
-figColor = get(gcf, 'color');
 if ~isempty(s.levelNames)
     yMin = yLims(1)-labelVertSize*range(yLims);
     lineObj = line([0 0], [yMin, yLims(1)], 'color', figColor, 'linewidth', 3); % cover bottom of y axis with white line
