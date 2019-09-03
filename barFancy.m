@@ -54,7 +54,7 @@ s.levelNames = {};            % names of levels for each factor // cell array of
 s.ylabel = [];
 
 % other
-s.labelSizePerFactor = .15;    % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
+s.labelSizePerFactor = .15;   % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
 
 
 
@@ -160,23 +160,20 @@ end
 if s.showBars
     for i = 1:numConditions
         
+        x = [-.5 .5]*s.barWidth + xPositions(i);  % left edges of bar
+        y = [0, s.summaryFunction(allData{i})];   % right edges of bar
+            
         % add bar outline
         if s.barAlpha<1
-            x = [-.5 .5]*s.barWidth + xPositions(i);
-            y = [0, s.summaryFunction(allData{i})];
             plot([x(1) x(1) x(2) x(2)], [y(1) y(2) y(2) y(1)], ...
                 'LineWidth', s.lineThickness, 'Color', s.colors(i,:));
         end
         
         % fill in bar
         if s.barAlpha>0
-            if ~isnan(s.summaryFunction(allData{i}))
-                height = s.summaryFunction(allData{i});
-                x = xPositions(i)-.5*s.barWidth;  % bottom left corner of bar
-                y = min(height, 0);               % bottom left corner of bar
-                rectangle('Position', [x, y, s.barWidth, abs(height)], 'LineWidth', s.lineThickness, ...
-                    'EdgeColor', 'none', 'FaceColor', [s.colors(i,:) s.barAlpha]);
-            end
+            pshape = polyshape([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)]);
+            pshape = plot(pshape);
+            set(pshape, 'EdgeColor', 'none', 'FaceColor', [s.colors(i,:)], 'FaceAlpha', s.barAlpha)
         end
     end
 end
