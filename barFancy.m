@@ -186,28 +186,22 @@ end
 
 % SET Y LIMITS
 if isempty(s.YLim)
+    s.YLim = get(gca, 'YLim');
+    
     if s.showBars  % bar plot will always start at zero // otherwise, use the automatically determined y limits
+        
+        % collect all data included in plot to determine range
         summaries = cellfun(s.summaryFunction, allData)';
         errors = cellfun(s.errorFunction, allData)';
-        
         ys = summaries;  % ys contains all data to be included in range, which depends on elements are to be included in plot
         if s.showScatter; ys = [ys; data(:)]; end
         if s.showErrorBars; ys = [ys; summaries+errors; summaries-errors]; end
-
-        buffer = range(ys)*.05;
+        
         if min(ys)>0  % if all data are positive, lower y limit is 0
-            ymin = 0;
-            ymax = max(ys) + buffer;
+            s.YLim(1) = 0;
         elseif max(ys)<0  % if all data are negative, upper y limit is zero
-            ymin = min(ys) - buffer;
-            ymax = 0;
-        else
-            ymin = min(ys) - buffer;
-            ymax = max(ys) + buffer;
+            s.YLim(2) = 0;
         end
-        s.YLim = [ymin ymax];
-    else
-        s.YLim = get(gca, 'YLim');
     end
 end
 set(gca, 'YLim', s.YLim);
