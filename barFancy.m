@@ -175,9 +175,8 @@ if s.showBars
         
         % fill in bar
         if s.barAlpha>0
-            pshape = polyshape([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)]);
-            pshape = plot(pshape);
-            set(pshape, 'EdgeColor', 'none', 'FaceColor', [s.colors(i,:)], 'FaceAlpha', s.barAlpha)
+            patch([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], [s.colors(i,:)], ...
+                'EdgeColor', 'none', 'FaceAlpha', s.barAlpha)
         end
     end
 end
