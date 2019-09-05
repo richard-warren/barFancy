@@ -44,6 +44,7 @@ s.lineThickness = 3;          % thickness of bar border
 
 % axis settings
 s.YLim = [];
+s.axisColor = [];
 
 % scatter settings
 s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
@@ -264,6 +265,11 @@ if ~isempty(s.levelNames)
     lineObj = line([0 0], [yMin, s.YLim(1)], 'color', figColor, 'linewidth', 3); % cover bottom of y axis with white line
     uistack(lineObj, 'bottom')
     s.YLim = [yMin, s.YLim(2)];
+end
+
+% set axis color
+if ~isempty(s.axisColor)
+    set(gca, 'XColor', s.axisColor, 'YColor', s.axisColor);
 end
 
 % reset axis ticks and limits
