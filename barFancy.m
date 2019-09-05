@@ -56,8 +56,6 @@ s.scatterAlpha = .2;
 % labels
 s.levelNames = {};            % names of levels for each factor // cell array of cell arrays where each nested array contains names of the levels for a particular factor, e.g. {{'male', 'female'}, {'tall', 'short'}}
 s.ylabel = [];
-
-% other
 s.labelSizePerFactor = .15;   % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
 
 
@@ -151,7 +149,7 @@ for i = 1:numConditions
     if s.showErrorBars
         err = s.errorFunction(condData);
         line([xPositions(i) xPositions(i)], [err -err] + s.summaryFunction(condData), ...
-            'color', s.colors(i,:), 'linewidth', s.lineThickness*.5)
+            'color', s.colors(i,:), 'linewidth', s.lineThickness)
     end
     
     % add mean
@@ -207,7 +205,6 @@ end
 set(gca, 'YLim', s.YLim);
 yTicks = get(gca, 'ytick');
 
-line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % add line at y=0 zero
 
 
 
@@ -217,6 +214,9 @@ line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', get(gca, 'YColor'))  % ad
 % this prevents bars from extending into the label area
 rectangle('Position', [0, s.YLim(1)-range(s.YLim), xPositions(end)+1, range(s.YLim)], ...
     'FaceColor', figColor, 'EdgeColor', 'none')
+
+% get current axis color
+if isempty(s.axisColor); s.axisColor=get(gca, 'XColor'); end
 
 % add labels
 for i = 1:length(s.levelNames)
@@ -230,15 +230,16 @@ for i = 1:length(s.levelNames)
         for k = 1:numLevels(i)
             inds = find(conditionsMat(i,:)==k & bins');
             xPos = mean(xPositions(inds));
-            yPos = s.YLim(1)-labelVertSize*range(s.YLim) + ((labelVertSize*range(s.YLim))/length(dataDims)*i);
+%             yPos = s.YLim(1)-labelVertSize*range(s.YLim) + ((labelVertSize*range(s.YLim))/length(dataDims)*i);
+            yPos = s.YLim(1)-labelVertSize*range(s.YLim) + ((labelVertSize*range(s.YLim))/(length(s.levelNames)+1)*i);
             if i==numFactors; rotation = 25; else; rotation = 0; end
             if ~isempty(s.levelNames)
                 condText = text(xPos, yPos, s.levelNames{i}(k), 'rotation', rotation, ...
-                    'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+                    'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle', 'color', s.axisColor);
             end
             
             % add lines on the side of condition name
-            if i<numFactors
+            if i<length(s.levelNames)
                 if ~isempty(s.levelNames)
                     textPos = get(condText, 'Extent');
                     line([xPositions(inds(1)) textPos(1)], [yPos yPos], 'color', [.5 .5 .5]) % left side of text
@@ -267,10 +268,9 @@ if ~isempty(s.levelNames)
     s.YLim = [yMin, s.YLim(2)];
 end
 
-% set axis color
-if ~isempty(s.axisColor)
-    set(gca, 'XColor', s.axisColor, 'YColor', s.axisColor);
-end
+% set axis color and add line at y=0
+set(gca, 'XColor', s.axisColor, 'YColor', s.axisColor);
+line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', s.axisColor)  % add line at y=0 zero
 
 % reset axis ticks and limits
 set(gca, 'YLim', s.YLim, 'yTick', yTicks, 'XLim', [0 xPositions(end)+1], ...
