@@ -41,17 +41,21 @@ s.violinAlpha = .2;
 s.barSeparation = .5;         % how far apart to separate bars // expressed as fraction of width of single bar
 s.barWidth = 1;
 s.lineThickness = 3;          % thickness of bar border
+s.constantEdgeColor = [];     % if provided, the edges of all bars have the same color (only if showBars set to false for now)
 
 % axis settings
 s.YLim = [];
 s.axisColor = [];
+s.YTick = [];
 
 % scatter settings
+s.scatterCondColor = false;   % whether to use the same color for all scatter points within a condition
 s.connectDots = false;        % if samples are repeated measures (i.e. within subjects design), scatter points representing the same sample across conditions can be conneceted with lines
 s.showScatter = true;         % scatter the values of individual samples
 s.scatterColors = 'hsv';      % if single color, all scatters will have that colors // if a matlab color space (e.g. 'hsv') OR (number of samples per condition) X 3 matrix where each row is the color of a particular sample (appropriate for repeated measure designs)
 s.scatterSize = 40;
-s.scatterAlpha = .2;
+s.scatterAlpha = .2;          % transparency of scatter points
+s.lineAlpha = .2;             % transparency of lines connecting scatter points
 
 % labels
 s.levelNames = {};            % names of levels for each factor // cell array of cell arrays where each nested array contains names of the levels for a particular factor, e.g. {{'male', 'female'}, {'tall', 'short'}}
@@ -118,8 +122,9 @@ if s.connectDots && dataDims(end)<100  % latter term prevents drawing lines with
             inds = num2cell([conditionsMat(:,j); i]);
             smpData(j) = squeeze(data(inds{:}));
         end
-
-        line(xPositions+xJitters(i), smpData, 'linewidth', 1, 'color', 1-[1 1 1]*s.scatterAlpha);
+        
+%         keyboard
+        line(xPositions+xJitters(i), smpData, 'linewidth', 1, 'color', [0 0 0 s.lineAlpha]);
     end
 end
 
@@ -135,14 +140,15 @@ for i = 1:numConditions
     if s.showViolins
         [p,y] = ksdensity(condData);
         p = p / max(p) * s.barWidth*.5; % normalize range
-        fill([p -fliplr(p)]+xPositions(i), [y fliplr(y)], [.8 .8 .8], ...
+        fill([p -fliplr(p)]+xPositions(i), [y fliplr(y)], figColor, ...
             'FaceColor', s.colors(i,:), 'FaceAlpha', s.violinAlpha, 'EdgeColor', s.colors(i,:))
     end
     
     % scatter raw data
     if s.showScatter
+        if s.scatterCondColor; c = s.colors(i,:); else; c = s.scatterColors; end
         scatter(xJitters + xPositions(i), condData, ...
-            s.scatterSize, s.scatterColors, 'filled', 'MarkerFaceAlpha', s.scatterAlpha); hold on
+            s.scatterSize, c, 'filled', 'MarkerFaceAlpha', s.scatterAlpha); hold on
     end
     
     % add error bars
@@ -154,8 +160,9 @@ for i = 1:numConditions
     
     % add mean
     if ~s.showBars
+        if s.constantEdgeColor; c = s.constantEdgeColor; else; c = s.colors(i,:); end
         line([-.5 .5]*s.barWidth + xPositions(i), repmat(s.summaryFunction(condData),1,2), ...
-            'color', s.colors(i,:), 'linewidth', s.lineThickness)
+            'color', c, 'linewidth', s.lineThickness)
     end
 end
 
@@ -203,17 +210,17 @@ if isempty(s.YLim)
     end
 end
 set(gca, 'YLim', s.YLim);
-yTicks = get(gca, 'ytick');
+if isempty(s.YTick)
+    s.YTick = get(gca, 'YTick');
+    yTickLabels = get(gca, 'YTickLabels');
+else
+    yTickLabels = strsplit(num2str(s.YTick));
+end
 
 
 
 
 % ADD AXIS LABELS
-
-% cover area beneathe lower y limit with white box
-% this prevents bars from extending into the label area
-rectangle('Position', [0, s.YLim(1)-range(s.YLim), xPositions(end)+1, range(s.YLim)], ...
-    'FaceColor', figColor, 'EdgeColor', 'none')
 
 % get current axis color
 if isempty(s.axisColor); s.axisColor=get(gca, 'XColor'); end
@@ -254,26 +261,35 @@ end
 
 % add y axis label
 if ~isempty(s.ylabel)
-    lab = ylabel(s.ylabel);
-    labPos = get(lab, 'position');
-    labPos(2) = mean(s.YLim);
-    set(lab, 'position', labPos);
+    x = -.05*range(xPositions);
+    y = mean(s.YLim);
+    text(x, y, s.ylabel, 'Rotation', 90, ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
 end
+
+% add x and y axes
+set(gca, 'XColor', 'none', 'YColor', 'none');
+plot([0 0 xPositions(end)+s.barWidth/2], ...
+     [s.YLim(2) s.YLim(1) s.YLim(1)], ...
+     'color', s.axisColor)  % add line at y=0 zero
+
+% y ticks
+tickSz = .01*range(xPositions);
+plot([tickSz, 0], repmat(s.YTick,2,1), 'Color', s.axisColor)
+for i = 1:length(s.YTick)
+    text(-tickSz, s.YTick(i), yTickLabels{i}, ...
+        'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle')
+end
+
+
 
 % add room below figure for labels
 if ~isempty(s.levelNames)
     yMin = s.YLim(1)-labelVertSize*range(s.YLim);
-    lineObj = line([0 0], [yMin, s.YLim(1)], 'color', figColor, 'linewidth', 3); % cover bottom of y axis with white line
-    uistack(lineObj, 'bottom')
     s.YLim = [yMin, s.YLim(2)];
 end
 
-% set axis color and add line at y=0
-set(gca, 'XColor', s.axisColor, 'YColor', s.axisColor);
-line([0 xPositions(end)+s.barWidth/2], [0 0], 'color', s.axisColor)  % add line at y=0 zero
-
 % reset axis ticks and limits
-set(gca, 'YLim', s.YLim, 'yTick', yTicks, 'XLim', [0 xPositions(end)+1], ...
-    'XColor', 'none', 'Color', figColor)
+set(gca, 'YLim', s.YLim, 'XLim', [0 xPositions(end)+s.barWidth/2], 'Color', figColor)
 
 
