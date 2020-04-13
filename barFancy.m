@@ -47,6 +47,8 @@ s.constantEdgeColor = [];     % if provided, the edges of all bars have the same
 s.YLim = [];
 s.axisColor = [];
 s.YTick = [];
+s.edgeLabelsOnly = false;     % if true, y tick labels are only applied to the first and last tick
+s.tickWidth = .015;           % expressed as fraction of x axis range
 
 % scatter settings
 s.scatterCondColor = false;   % whether to use the same color for all scatter points within a condition
@@ -259,14 +261,6 @@ for i = 1:length(s.levelNames)
     end
 end
 
-% add y axis label
-if ~isempty(s.ylabel)
-    x = -.05*range(xPositions);
-    y = mean(s.YLim);
-    text(x, y, s.ylabel, 'Rotation', 90, ...
-        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
-end
-
 % add x and y axes
 set(gca, 'XColor', 'none', 'YColor', 'none');
 plot([0 0 xPositions(end)+s.barWidth/2], ...
@@ -274,14 +268,24 @@ plot([0 0 xPositions(end)+s.barWidth/2], ...
      'color', s.axisColor)  % add line at y=0 zero
 
 % y ticks
-tickSz = .01*range(xPositions);
+yLabelX = 0;  % this stores the right-most edge of the ylabel // it is updated below such that it hugs the widest ylabel that occurs
+tickSz = s.tickWidth*range(xPositions);
 plot([tickSz, 0], repmat(s.YTick,2,1), 'Color', s.axisColor)
-for i = 1:length(s.YTick)
-    text(-tickSz, s.YTick(i), yTickLabels{i}, ...
-        'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle')
+
+if s.edgeLabelsOnly; ticks = [1 length(s.YTick)]; else; ticks = 1:length(s.YTick); end
+for i = ticks
+    tickText = text(-tickSz, s.YTick(i), yTickLabels{i}, ...
+        'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
+    textPos = get(tickText, 'Extent');
+    if textPos(1)<yLabelX; yLabelX = textPos(1); end
 end
 
-
+% add y axis label
+if ~isempty(s.ylabel)
+    y = mean(s.YLim);
+    text(yLabelX, y, s.ylabel, 'Rotation', 90, ...
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
+end
 
 % add room below figure for labels
 if ~isempty(s.levelNames)
