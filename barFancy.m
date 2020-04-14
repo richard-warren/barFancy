@@ -64,7 +64,15 @@ s.levelNames = {};            % names of levels for each factor // cell array of
 s.ylabel = [];
 s.labelSizePerFactor = .15;   % how much space to add to the bottom of the figure per factor, expressed as a fraction of y range
 
-
+% stats
+s.comparisons = [];               % (n X 2) matrix of conditions that should be compared to one another // indices are with respect to their ordering in the bar graph, e.g. [1 5] compares the 1st and the 5th bar in the plot
+s.test = 'signrank';              % 'ttest' or 'signrank'
+s.pThresh = [.05 .01 .001];       % !!! CURRENTLY MUST BE ORDERED FROM LARGEST TO SMALLEST!
+s.symbols = {'*', '**', '***'};   % symbols associated with the pThresh values above (they will appear above the brackets connecting the conditions to be compared)
+s.bracketSz = .02;                % size of the vertical ticks in the brackets // expressed as fraction of y axis range
+s.notSigText = '';                % text to appear above brackets for not groups that do not significanctly differ
+s.showBracketTicks = true;        % whether to show brackets (with vertical ticks) or just horizontal lines connecting conditions
+s.sigColor = [1 .2 .2];           % brackets become this color for a significant difference
 
 
 % INITIALIZATIONS
@@ -295,5 +303,79 @@ end
 
 % reset axis ticks and limits
 set(gca, 'YLim', s.YLim, 'XLim', [0 xPositions(end)+s.barWidth/2], 'Color', figColor)
+
+
+
+
+% ADD STATS
+if s.comparisons
+    
+    fprintf('\n%s comparisons\n----------------------\n', s.test)
+    notOccupied = true(size(s.comparisons,1), length(xPositions));
+    tickSz = s.bracketSz*range(s.YLim);
+    maxHgt = 1;  % keep track of how many vertical 'stacks' of brackets there are above the plot
+    if isempty(s.sigColor); s.sigColor = s.axisColor; end
+    
+    for i = 1:size(s.comparisons,1)
+        
+        x = s.comparisons(i,:);  % x inds of conditions to be compared
+        
+        % run statistical test
+        switch s.test
+            case 'ttest'
+                [~, p] = ttest(allData{x(1)}, allData{x(2)});
+            case 'signrank'
+                p = signrank(allData{x(1)}, allData{x(2)});
+        end
+        
+        % determine whether significance is reached
+        pInd = find(p<s.pThresh, 1, 'last');
+        isSig = ~isempty(pInd);
+        
+        % set significance dependent parameters
+        if isSig
+            t = s.symbols{pInd};
+            props = {'VerticalAlignment', 'middle', 'FontSize', 10};
+            offset = .25*tickSz;
+            c = s.sigColor;
+        else
+            t = s.notSigText;
+            props = {'VerticalAlignment', 'bottom', 'FontSize', 10};
+            offset = 0;
+            c = s.axisColor;
+        end
+        
+        % print results
+        fprintf('%2i->%2i, p = %.2d = %.5f %s\n', x(1), x(2), p, p, t)
+        
+        % determine how high the bracket will be
+        hgt = 1;
+        while ~all(notOccupied(hgt, x(1):x(2)))
+            hgt = hgt + 1;
+            maxHgt = max(maxHgt, hgt);
+        end
+        notOccupied(hgt, x(1):x(2)) = false;
+        y = s.YLim(2) + hgt*tickSz*1.5;
+        
+        % add bracket
+        if s.showBracketTicks
+            plot(xPositions([x(1) x(1) x(2) x(2)]), [y-tickSz y y y-tickSz], 'Color', c)
+        else
+            plot(xPositions([x(1) x(2)]), [y y], 'Color', c)
+        end
+        
+        % add text above bracket
+        text(mean(xPositions(x)), y+offset, t, 'HorizontalAlignment', 'center', props{:}, 'Color', c)
+    end
+    
+    set(gca, 'YLim', [s.YLim(1) s.YLim(2)+maxHgt*tickSz*1.5])
+end
+
+
+
+
+
+
+
 
 
