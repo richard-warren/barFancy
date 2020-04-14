@@ -66,13 +66,13 @@ s.labelSizePerFactor = .15;   % how much space to add to the bottom of the figur
 
 % stats
 s.comparisons = [];               % (n X 2) matrix of conditions that should be compared to one another // indices are with respect to their ordering in the bar graph, e.g. [1 5] compares the 1st and the 5th bar in the plot
-s.test = 'signrank';              % 'ttest' or 'signrank'
+s.test = 'ttest';                 % 'ttest' or 'signrank'
 s.pThresh = [.05 .01 .001];       % !!! CURRENTLY MUST BE ORDERED FROM LARGEST TO SMALLEST!
 s.symbols = {'*', '**', '***'};   % symbols associated with the pThresh values above (they will appear above the brackets connecting the conditions to be compared)
 s.bracketSz = .02;                % size of the vertical ticks in the brackets // expressed as fraction of y axis range
 s.notSigText = '';                % text to appear above brackets for not groups that do not significanctly differ
 s.showBracketTicks = true;        % whether to show brackets (with vertical ticks) or just horizontal lines connecting conditions
-s.sigColor = [1 .2 .2];           % brackets become this color for a significant difference
+s.sigColor = [1 .2 .2]*.9;           % brackets become this color for a significant difference
 
 
 % INITIALIZATIONS
