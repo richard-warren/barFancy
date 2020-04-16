@@ -49,6 +49,7 @@ s.axisColor = [];
 s.YTick = [];
 s.edgeLabelsOnly = false;     % if true, y tick labels are only applied to the first and last tick
 s.tickWidth = .015;           % expressed as fraction of x axis range
+s.sideBuffer = .75;           % how much to add to the left and right of the first and last bars
 
 % scatter settings
 s.scatterCondColor = false;   % whether to use the same color for all scatter points within a condition
@@ -114,8 +115,7 @@ for i = 1:numFactors
     conditionsMat(i,:) = repmat(repelem(1:numLevels(i), repeats), 1, copies);
     xPositions = xPositions + (repelem(1:copies*numLevels(i), repeats)-1) * s.barSeparation;
 end
-
-
+xPositions = xPositions - 1 + s.sideBuffer;
 
 
 % GENERATE PLOT
@@ -271,7 +271,7 @@ end
 
 % add x and y axes
 set(gca, 'XColor', 'none', 'YColor', 'none');
-plot([0 0 xPositions(end)+s.barWidth/2], ...
+plot([0 0 xPositions(end)+s.sideBuffer], ...
      [s.YLim(2) s.YLim(1) s.YLim(1)], ...
      'color', s.axisColor)  % add line at y=0 zero
 
@@ -302,7 +302,7 @@ if ~isempty(s.levelNames)
 end
 
 % reset axis ticks and limits
-set(gca, 'YLim', s.YLim, 'XLim', [0 xPositions(end)+s.barWidth/2], 'Color', figColor)
+set(gca, 'YLim', s.YLim, 'XLim', [0 xPositions(end)+s.sideBuffer], 'Color', figColor)
 
 
 
