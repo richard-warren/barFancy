@@ -50,6 +50,7 @@ s.YTick = [];
 s.edgeLabelsOnly = false;     % if true, y tick labels are only applied to the first and last tick
 s.tickWidth = .015;           % expressed as fraction of x axis range
 s.sideBuffer = .75;           % how much to add to the left and right of the first and last bars
+s.lineAtZero = [];            % whether x axis is always at zero, or stays at the lower y limit // if empty this is automatically determined
 
 % scatter settings
 s.scatterCondColor = false;   % whether to use the same color for all scatter points within a condition
@@ -73,7 +74,7 @@ s.symbols = {'*', '**', '***'};   % symbols associated with the pThresh values a
 s.bracketSz = .02;                % size of the vertical ticks in the brackets // expressed as fraction of y axis range
 s.notSigText = '';                % text to appear above brackets for not groups that do not significanctly differ
 s.showBracketTicks = true;        % whether to show brackets (with vertical ticks) or just horizontal lines connecting conditions
-s.sigColor = [1 .2 .2]*.9;           % brackets become this color for a significant difference
+s.sigColor = [1 .2 .2]*.9;        % brackets become this color for a significant difference
 
 
 % INITIALIZATIONS
@@ -100,7 +101,7 @@ end
 if ischar(s.scatterColors); s.scatterColors = eval([s.scatterColors '(dataDims(end))']); end
 
 % determine various spatial parameters
-labelVertSize = s.labelSizePerFactor*numFactors;  % size of space below figure to give to to axis labels, expressed as fraction of y range
+labelVertSize = s.labelSizePerFactor*length(s.levelNames);  % size of space below figure to give to to axis labels, expressed as fraction of y range
 xJitters = linspace(-.25*s.barWidth, .25*s.barWidth, dataDims(end));  % jitters for scatter points
 xJitters = xJitters(randperm(length(xJitters)));
 
@@ -269,11 +270,25 @@ for i = 1:length(s.levelNames)
     end
 end
 
-% add x and y axes
+
+
+
+% ADD X AND Y AXES
 set(gca, 'XColor', 'none', 'YColor', 'none');
-plot([0 0 xPositions(end)+s.sideBuffer], ...
-     [s.YLim(2) s.YLim(1) s.YLim(1)], ...
-     'color', s.axisColor)  % add line at y=0 zero
+
+
+if isempty(s.lineAtZero)
+    s.lineAtZero = prod(s.YLim)<0 && s.showBars;  % if the y axis does not contain zero, horizontal line is at bottom of figure
+end
+
+if ~s.lineAtZero
+	plot([0 0 xPositions(end)+s.sideBuffer], ...
+        [s.YLim(2) s.YLim(1) s.YLim(1)], ...
+        'color', s.axisColor)  % add line at y=0 zero
+else
+    plot([0 0], [s.YLim(2) s.YLim(1)], 'color', s.axisColor)
+    plot([0 xPositions(end)+s.sideBuffer], [0 0], 'color', s.axisColor)
+end
 
 % y ticks
 yLabelX = 0;  % this stores the right-most edge of the ylabel // it is updated below such that it hugs the widest ylabel that occurs
@@ -292,7 +307,7 @@ end
 if ~isempty(s.ylabel)
     y = mean(s.YLim);
     text(yLabelX, y, s.ylabel, 'Rotation', 90, ...
-        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom')
+        'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom', 'Interpreter', 'none')
 end
 
 % add room below figure for labels
@@ -367,6 +382,7 @@ if s.comparisons
         % add text above bracket
         text(mean(xPositions(x)), y+offset, t, 'HorizontalAlignment', 'center', props{:}, 'Color', c)
     end
+    fprintf('\n')
     
     set(gca, 'YLim', [s.YLim(1) s.YLim(2)+maxHgt*tickSz*1.5])
 end
